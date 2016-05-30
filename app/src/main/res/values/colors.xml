@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="c0">#688</color>
+    <color name="c2">#99f</color>
+    <color name="c4">#9f9</color>
+    <color name="c8">#f99</color>
+    <color name="c16">#44f</color>
+    <color name="c32">#4f4</color>
+    <color name="c64">#f44</color>
+    <color name="c128">#46460300</color>
+    <color name="c256">#46460300</color>
+    <color name="c512">#46460300</color>
+    <color name="c1024">#46460300</color>
+    <color name="c2048">#46460300</color>
+    <color name="c4096">#46460300</color>
+    <color name="c8192">#46460300</color>
+    <color name="c16384">#46460300</color>
+    <color name="c32768">#46460300</color>
+    <color name="c65536">#46460300</color>
+    <color name="c131072">#46460300</color>
+</resources>

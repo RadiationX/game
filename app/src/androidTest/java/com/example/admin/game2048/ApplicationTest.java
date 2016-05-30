@@ -1,4 +1,4 @@
-package com.example.admin.game2048v0_2;
+package com.example.admin.game2048;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

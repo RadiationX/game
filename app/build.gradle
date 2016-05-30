@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.example.admin.game2048v0_2"
+        applicationId "com.example.admin.game2048"
         minSdkVersion 14
         targetSdkVersion 23
         versionCode 1

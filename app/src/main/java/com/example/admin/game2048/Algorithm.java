@@ -298,8 +298,8 @@ public class Algorithm {
 
     public GradientDrawable color(int var) {
         GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(5);
-        gd.setStroke(2, 0xFF000000);
+        gd.setCornerRadius(8);
+        //gd.setStroke((int)MainActivity.convertDpToPixel(4, App.getContext()), 0x55000000);
         int color = 0;
         switch (var) {
             case 0:

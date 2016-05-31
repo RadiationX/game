@@ -5,20 +5,27 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.GridLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity {
 
     TextView score;
     RelativeLayout RL;
-    RelativeLayout container;
+    GridLayout container;
     public Algorithm algorithm;
     TextView[][] views;
     TextView score2;
@@ -32,13 +39,16 @@ public class MainActivity extends ActionBarActivity {
         score = (TextView) findViewById(R.id.Score);
         RL = (RelativeLayout) findViewById(R.id.Main2);
         score2 = (TextView) findViewById(R.id.Score2);
-        container = (RelativeLayout) findViewById(R.id.container);
+        container = (GridLayout) findViewById(R.id.container);
+        container.removeAllViews();
+        container.setColumnCount(4);
+        container.setRowCount(4);
         GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(5);
-        gd.setStroke(2, 0xFF000000);
-        gd.setColor(0xff597da3);
+        gd.setCornerRadius(8);
+        gd.setColor(0xff4f5a6e);
         container.setBackgroundDrawable(gd);
-        RL.setOnTouchListener(new OnSwipeTouchListener(this){
+
+        RL.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public boolean onSwipeRight() {
                 Right();
@@ -63,6 +73,13 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             }
         });
+        container.post(new Runnable() {
+            @Override
+            public void run() {
+                Start();
+            }
+        });
+
     }
 
     public void New_Game(View v) {
@@ -71,46 +88,49 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public static float convertDpToPixel(float dp, Context context){
-        Resources resources = context.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT) * dp;
+        return ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT) * dp;
+    }
+
+    public float textSize(String s){
+        if(s.length()==4) {
+            return convertDpToPixel(16, this);
+        }else if(s.length()==5) {
+            return convertDpToPixel(12, this);
+        }else if(s.length()==6) {
+            return convertDpToPixel(8, this);
+        }
+        return convertDpToPixel(18, this);
     }
     private void Start() {
         algorithm = new Algorithm();
         algorithm.Zero();//Обнуление игрового массива
-        //algorithm.Start();
         views = new TextView[4][4];
-        int size;
-        size = container.getWidth();
-        GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(5);
-        gd.setStroke(1, 0xFF000000);
         int padding = container.getPaddingLeft();
-        int margin = container.getPaddingLeft();
-        size = size-padding*2;
-        int huina = (int) convertDpToPixel(8, this);
+        int size = (container.getWidth() - padding * 6)/4;
+        GradientDrawable gd = new GradientDrawable();
+        gd.setCornerRadius(8);
+        gd.setStroke((int)convertDpToPixel(8, this), 0xFF000000);
+        int margin = padding/2;
+
         int id = 0;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 id++;
                 views[i][j] = new TextView(this);
                 views[i][j].setId(id);
-                //views[i][j].setLayoutParams(new LinearLayout.LayoutParams(70 + 50 * i, 100 + 50 * j));//***300->200
-                ViewGroup.MarginLayoutParams kek = new ViewGroup.MarginLayoutParams((size-huina*2)/4, (size-huina*2)/4);
-                kek.leftMargin =  (size+huina)/4 * i;
-                kek.topMargin =  (size+huina)/4 * j;
+                String keks = ""+algorithm.mass[i][j]*10;
 
-                views[i][j].setLayoutParams(kek);//***300->200
+                GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+                param.width = param.height = size;
+                param.leftMargin = param.topMargin = param.rightMargin = param.bottomMargin = margin;
+                param.setGravity(Gravity.CENTER);
+                param.columnSpec = GridLayout.spec(i);
+                param.rowSpec = GridLayout.spec(j);
+                views[i][j].setLayoutParams(param);
                 views[i][j].setGravity(Gravity.CENTER);
-                //views[i][j].setWidth(70 + 50 * i);
-                //views[i][j].setHeight(100 + 50 * j);
-                //views[i][j].setScaleType(ImageView.ScaleType.CENTER_CROP);
-                //views[i][j].setPadding(20 + 50 * i, 50 + 50 * j, 0, 0);//***200->100
-                //views[i][j].setPadding(20 + 50 * i, 50 + 50 * j, 0, 0);//***200->100
-                //views[i][j].setImageResource(algorithm.RetText(algorithm.mass[i][j]));
-                //views[i][j].setBackgroundColor(algorithm.color(algorithm.mass[i][j]));
-                if(algorithm.mass[i][j]!=0)
-                    views[i][j].setText(""+algorithm.mass[i][j]);
+                if (algorithm.mass[i][j] != 0)
+                    views[i][j].setText(keks);
+                views[i][j].setTextSize(textSize(keks));
 
                 views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
 
@@ -119,27 +139,26 @@ public class MainActivity extends ActionBarActivity {
         }
         algorithm.Start();
         Draw();
-
     }
 
     private void Draw() {
         score.setText(Integer.toString(algorithm.Score));
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
+
                 if (algorithm.mass[i][j] != 2000 && algorithm.mass[i][j] != 4000) {
-                    views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
-                    views[i][j].setText(algorithm.mass[i][j]==0?"":""+algorithm.mass[i][j]);
                 }
                 if (algorithm.mass[i][j] == 2000) {
                     algorithm.mass[i][j] = 2;
-                    views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
-                    views[i][j].setText(algorithm.mass[i][j]==0?"":""+algorithm.mass[i][j]);
                 }
                 if (algorithm.mass[i][j] == 4000) {
                     algorithm.mass[i][j] = 4;
-                    views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
-                    views[i][j].setText(algorithm.mass[i][j]==0?"":""+algorithm.mass[i][j]);
+
                 }
+                String keks = ""+algorithm.mass[i][j];
+                views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
+                views[i][j].setText(algorithm.mass[i][j] == 0 ? "" : keks);
+                views[i][j].setTextSize(textSize(keks));
             }
         }
     }

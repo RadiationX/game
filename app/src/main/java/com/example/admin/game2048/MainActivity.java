@@ -1,211 +1,240 @@
 package com.example.admin.game2048;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.MarginLayoutParamsCompat;
-import android.support.v7.app.ActionBarActivity;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
-public class MainActivity extends ActionBarActivity {
-
-    TextView score;
-    RelativeLayout RL;
-    GridLayout container;
-    public Algorithm algorithm;
-    TextView[][] views;
-    TextView score2;
+public class MainActivity extends Activity {
+    private TextView score, topScore;
+    private GridLayout container;
+    private Algorithm algorithm;
+    private TextView[][] views;
+    private SharedPreferences preferences;
+    private int currentTopScore = 0;
+    private final static int size = Algorithm.size;
+    private static float density = 0;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        density = (float) getResources().getDisplayMetrics().densityDpi;
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        RelativeLayout mainLayout = (RelativeLayout) findViewById(R.id.Main2);
         score = (TextView) findViewById(R.id.Score);
-        RL = (RelativeLayout) findViewById(R.id.Main2);
-        score2 = (TextView) findViewById(R.id.Score2);
+        topScore = (TextView) findViewById(R.id.topScore);
         container = (GridLayout) findViewById(R.id.container);
-        container.removeAllViews();
+        assert container != null;
+        assert mainLayout != null;
+
         container.setColumnCount(4);
         container.setRowCount(4);
         GradientDrawable gd = new GradientDrawable();
         gd.setCornerRadius(8);
-        gd.setColor(0xff4f5a6e);
+        gd.setColor(getResources().getColor(R.color.grid_bg));
         container.setBackgroundDrawable(gd);
+        currentTopScore = preferences.getInt("topScore", 0);
 
-        RL.setOnTouchListener(new OnSwipeTouchListener(this) {
+        topScore.setText("" + currentTopScore);
+
+        mainLayout.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public boolean onSwipeRight() {
-                Right();
+                right();
                 return true;
             }
 
             @Override
             public boolean onSwipeLeft() {
-                Left();
+                left();
                 return true;
             }
 
             @Override
             public boolean onSwipeTop() {
-                Up();
+                up();
                 return true;
             }
 
             @Override
             public boolean onSwipeBottom() {
-                Down();
+                down();
                 return true;
             }
         });
         container.post(new Runnable() {
             @Override
             public void run() {
-                Start();
+                newGame();
             }
         });
-
     }
 
-    public void New_Game(View v) {
-        score.setText("------>");
-        Start();
-    }
-
-    public static float convertDpToPixel(float dp, Context context){
-        return ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT) * dp;
-    }
-
-    public float textSize(String s){
-        if(s.length()==4) {
-            return convertDpToPixel(16, this);
-        }else if(s.length()==5) {
-            return convertDpToPixel(12, this);
-        }else if(s.length()==6) {
-            return convertDpToPixel(8, this);
+    public void newGame(View v) {
+        if (algorithm != null) {
+            if (algorithm.score > 0) {
+                new AlertDialog.Builder(this)
+                        .setMessage("Вы уверены что хотите начать новую игру?")
+                        .setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                newGame();
+                            }
+                        }).setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                }).show();
+                return;
+            }
         }
-        return convertDpToPixel(18, this);
+        newGame();
     }
-    private void Start() {
+
+    private void newGame() {
+        container.removeAllViews();
+        start();
+    }
+
+    public static float convertDpToPixel(float dp) {
+        return (density / DisplayMetrics.DENSITY_DEFAULT) * dp;
+    }
+
+    public float textSize(String s) {
+        switch (s.length()) {
+            case 4:
+                return convertDpToPixel(14);
+            case 5:
+                return convertDpToPixel(12);
+            case 6:
+                return convertDpToPixel(10);
+            default:
+                return convertDpToPixel(18);
+        }
+    }
+
+    private void start() {
         algorithm = new Algorithm();
-        algorithm.Zero();//Обнуление игрового массива
-        views = new TextView[4][4];
+        algorithm.clear();
+        views = new TextView[size][size];
         int padding = container.getPaddingLeft();
-        int size = (container.getWidth() - padding * 6)/4;
-        GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(8);
-        gd.setStroke((int)convertDpToPixel(8, this), 0xFF000000);
-        int margin = padding/2;
+        int proportions = (container.getWidth() - padding * 6) / 4;
+        int margin = padding / 2;
 
         int id = 0;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 id++;
                 views[i][j] = new TextView(this);
                 views[i][j].setId(id);
-                String keks = ""+algorithm.mass[i][j]*10;
+                String text = "" + algorithm.mass[i][j];
 
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-                param.width = param.height = size;
+                param.width = param.height = proportions;
                 param.leftMargin = param.topMargin = param.rightMargin = param.bottomMargin = margin;
                 param.setGravity(Gravity.CENTER);
                 param.columnSpec = GridLayout.spec(i);
                 param.rowSpec = GridLayout.spec(j);
                 views[i][j].setLayoutParams(param);
                 views[i][j].setGravity(Gravity.CENTER);
+
+
                 if (algorithm.mass[i][j] != 0)
-                    views[i][j].setText(keks);
-                views[i][j].setTextSize(textSize(keks));
+                    views[i][j].setText(text);
+
+                views[i][j].setTextSize(textSize(text));
 
                 views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
 
                 container.addView(views[i][j]);
             }
         }
-        algorithm.Start();
-        Draw();
+        algorithm.start();
+        draw();
     }
 
-    private void Draw() {
-        score.setText(Integer.toString(algorithm.Score));
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-
-                if (algorithm.mass[i][j] != 2000 && algorithm.mass[i][j] != 4000) {
-                }
-                if (algorithm.mass[i][j] == 2000) {
+    private void draw() {
+        score.setText(Integer.toString(algorithm.score));
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (algorithm.mass[i][j] == Algorithm.newTwo)
                     algorithm.mass[i][j] = 2;
-                }
-                if (algorithm.mass[i][j] == 4000) {
-                    algorithm.mass[i][j] = 4;
 
-                }
-                String keks = ""+algorithm.mass[i][j];
+                if (algorithm.mass[i][j] == Algorithm.newFour)
+                    algorithm.mass[i][j] = 4;
+                String text = "" + algorithm.mass[i][j];
                 views[i][j].setBackgroundDrawable(algorithm.color(algorithm.mass[i][j]));
-                views[i][j].setText(algorithm.mass[i][j] == 0 ? "" : keks);
-                views[i][j].setTextSize(textSize(keks));
+                views[i][j].setText(algorithm.mass[i][j] == 0 ? "" : text);
+                views[i][j].setTextSize(textSize(text));
             }
         }
     }
 
-
-    public void Left() {
+    public void left() {
         algorithm.left();
-        Draw();
-        if (algorithm.GameOver()) {
-            Game_over();
-        }
+        draw();
+        if (algorithm.isGameOver())
+            gameOver();
     }
 
-    public void Up() {
+    public void up() {
         algorithm.up();
-        Draw();
-        if (algorithm.GameOver()) {
-            Game_over();
-        }
+        draw();
+        if (algorithm.isGameOver())
+            gameOver();
     }
 
-    public void Down() {
+    public void down() {
         algorithm.down();
-        Draw();
-        if (algorithm.GameOver()) {
-            Game_over();
-        }
+        draw();
+        if (algorithm.isGameOver())
+            gameOver();
     }
 
-    public void Right() {
+    public void right() {
         algorithm.right();
-        Draw();
-        if (algorithm.GameOver()) {
-            Game_over();
+        draw();
+        if (algorithm.isGameOver())
+            gameOver();
+    }
+
+    public void gameOver() {
+        if (algorithm.score > currentTopScore) {
+            currentTopScore = algorithm.score;
+            preferences.edit().putInt("topScore", currentTopScore).apply();
+            topScore.setText("" + currentTopScore);
         }
-    }
-
-    public void Game_over() {
-        setContentView(R.layout.game_over);
-    }
-
-    public void New_Game2(View v) {
-        setContentView(R.layout.activity_main);//не работает новая игра
-        Start();
-    }
-
-    public void Exit(View v) {
-        System.exit(0);
+        new AlertDialog.Builder(this)
+                .setTitle("Поражение")
+                .setMessage("Счет: " + Integer.toString(algorithm.score))
+                .setPositiveButton("Новая игра", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        newGame();
+                    }
+                })
+                .setNegativeButton("Выход", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        System.exit(0);
+                    }
+                })
+                .show();
     }
 }

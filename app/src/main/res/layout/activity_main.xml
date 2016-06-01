@@ -3,43 +3,74 @@
     android:id="@+id/Main2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#91a9d4"
-    android:paddingBottom="0dp"
-    android:paddingLeft="0dp"
-    android:paddingRight="0dp"
-    android:paddingTop="0dp"
+    android:background="@color/main_bg"
     tools:context=".MainActivity">
 
     <RelativeLayout
         android:id="@+id/topPanel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Счет:"
-            android:textSize="24sp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:paddingLeft="8dp"
-            android:id="@+id/textView2"
-            android:layout_alignBottom="@+id/Score"
-            android:layout_alignTop="@+id/button"
-            android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:padding="4dp">
 
-        <TextView
-            android:id="@+id/Score"
+        <LinearLayout
+            android:id="@+id/scoreField1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0"
-            android:paddingTop="6dp"
-            android:paddingLeft="4dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="24sp"
-            android:layout_toRightOf="@+id/textView2"
-            android:layout_toEndOf="@+id/textView2"
-            android:layout_alignParentTop="true"
-            android:gravity="center"
-            android:layout_alignBottom="@+id/button" />
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/score"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/Score"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/_0"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/scoreField2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/scoreField1"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/top_score"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/topScore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/_0"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/button"
@@ -50,11 +81,11 @@
             android:layout_alignParentTop="true"
             android:layout_margin="4dp"
             android:background="@android:color/transparent"
-            android:onClick="New_Game"
+            android:onClick="newGame"
             android:padding="8dp"
             android:text="@string/new_game"
-            android:textStyle="bold"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
     </RelativeLayout>
 
 
@@ -69,6 +100,8 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:animateLayoutChanges="true"
-        android:padding="8dp" />
+        android:padding="8dp"
+        android:rowOrderPreserved="false"
+        android:useDefaultMargins="false" />
 
 </RelativeLayout>

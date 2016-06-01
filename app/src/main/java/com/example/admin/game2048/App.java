@@ -3,8 +3,6 @@ package com.example.admin.game2048;
 import android.app.Application;
 import android.content.Context;
 
-import java.io.IOException;
-
 /**
  * Created by radiationx on 30.05.16.
  */

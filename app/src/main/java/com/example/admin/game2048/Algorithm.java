@@ -16,7 +16,6 @@ public class Algorithm {
 
     public Random rand;
 
-    //Обнуление игрового массива
     public void clear() {
         score = 0;
         for (int i = 0; i < size; i++)
